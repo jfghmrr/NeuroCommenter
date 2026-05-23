@@ -1,0 +1,48 @@
+# Секреты
+.env
+.env.local
+.env.*.local
+
+# Telethon sessions (равны логину в TG)
+*.session
+*.session-journal
+app/data/sessions/
+app/data/*.db
+app/data/*.db-journal
+app/data/*.db-wal
+app/data/*.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Логи
+*.log
+logs/
+
+# Локальные превью-скрипты
+_preview_run.sh

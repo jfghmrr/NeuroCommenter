@@ -1,0 +1,17 @@
+telethon==1.36.0
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+sqlalchemy[asyncio]==2.0.36
+aiosqlite==0.20.0
+httpx[socks]==0.28.1
+python-socks[asyncio]==2.5.3
+groq==0.15.0
+openai==1.59.7
+python-dotenv==1.0.1
+loguru==0.7.3
+cryptg==0.5.0.post0
+APScheduler==3.11.0
+jinja2==3.1.5
+python-multipart==0.0.20

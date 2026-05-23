@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>NeuroCommenter — Вход</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="login-bg">
+  <div class="login-card">
+    <h1>🤖 NeuroCommenter</h1>
+    <p class="muted">Введите пароль панели</p>
+    <input type="password" id="pwd" placeholder="Пароль" autofocus />
+    <button id="loginBtn">Войти</button>
+    <div id="err" class="error"></div>
+  </div>
+  <script>
+    async function doLogin() {
+      const pwd = document.getElementById('pwd').value;
+      const err = document.getElementById('err');
+      err.textContent = '';
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd }),
+          credentials: 'same-origin',
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          err.textContent = j.detail || 'Неверный пароль';
+          return;
+        }
+        location.href = '/';
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    }
+    document.getElementById('loginBtn').onclick = doLogin;
+    document.getElementById('pwd').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
+</body>
+</html>

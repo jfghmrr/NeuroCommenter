@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>NeuroCommenter</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">🤖 NeuroCommenter</div>
+    <div class="header-right">
+      <span id="status-pill" class="pill pill-off">остановлен</span>
+      <button id="toggleRun" class="btn-primary">▶ Запустить</button>
+      <span id="me" class="muted"></span>
+      <button id="logoutBtn" class="btn-ghost">Выйти</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Дашборд</button>
+    <button class="tab" data-tab="tg">Telegram</button>
+    <button class="tab" data-tab="channels">Каналы</button>
+    <button class="tab" data-tab="ai">AI ключи</button>
+    <button class="tab" data-tab="proxy">Прокси</button>
+    <button class="tab" data-tab="persona">Персона</button>
+    <button class="tab" data-tab="posts">Лента</button>
+    <button class="tab" data-tab="settings">Настройки</button>
+  </nav>
+
+  <main>
+    <!-- ============ DASHBOARD ============ -->
+    <section id="tab-dashboard" class="tab-pane active">
+      <h2>Статистика</h2>
+      <div class="stats-grid" id="stats"></div>
+      <h3>Последние посты в работе</h3>
+      <div id="dashFeed" class="feed compact"></div>
+    </section>
+
+    <!-- ============ TELEGRAM ============ -->
+    <section id="tab-tg" class="tab-pane">
+      <h2>Telegram аккаунт</h2>
+      <div id="tg-info" class="card"></div>
+
+      <div id="tg-login-block" class="card hide">
+        <h3>Вход в Telegram</h3>
+        <p class="muted">Только User API: <a href="https://my.telegram.org/apps" target="_blank">my.telegram.org/apps</a> — получи api_id/api_hash, положи в .env, перезапусти.</p>
+        <label>Номер телефона (с +)</label>
+        <input id="tg-phone" placeholder="+79991234567" />
+        <button id="tg-send-code">Получить код</button>
+
+        <div id="tg-code-block" class="hide">
+          <label>Код из Telegram</label>
+          <input id="tg-code" placeholder="12345" />
+          <label>2FA пароль (если есть)</label>
+          <input id="tg-pwd" type="password" placeholder="опционально" />
+          <button id="tg-sign-in">Войти</button>
+        </div>
+        <div id="tg-err" class="error"></div>
+      </div>
+    </section>
+
+    <!-- ============ CHANNELS ============ -->
+    <section id="tab-channels" class="tab-pane">
+      <h2>Каналы</h2>
+      <div class="row">
+        <button id="sync-channels" class="btn-primary">⟳ Синхронизировать с TG</button>
+        <span class="muted">Подтянутся все каналы на которые ты подписан. Отметь галочкой нужные.</span>
+      </div>
+      <table class="data">
+        <thead><tr><th></th><th>Канал</th><th>@</th><th>Контекст</th><th></th></tr></thead>
+        <tbody id="channels-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ============ AI KEYS ============ -->
+    <section id="tab-ai" class="tab-pane">
+      <h2>AI провайдеры и ключи</h2>
+      <div class="card">
+        <h3>Добавить ключ</h3>
+        <div class="row">
+          <select id="prov-select"></select>
+          <input id="prov-key" placeholder="API ключ" style="flex:1" />
+          <button id="add-key">Добавить</button>
+        </div>
+        <p class="muted">Можно несколько ключей на одного провайдера — будут ротироваться.</p>
+      </div>
+
+      <table class="data">
+        <thead><tr><th>Провайдер</th><th>Ключ</th><th>Активен</th><th>Ошибки</th><th>Последняя ошибка</th><th></th></tr></thead>
+        <tbody id="keys-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ============ PROXY ============ -->
+    <section id="tab-proxy" class="tab-pane">
+      <h2>Прокси (для AI запросов)</h2>
+      <div class="card">
+        <div class="row">
+          <input id="proxy-url" placeholder="socks5://user:pass@1.2.3.4:1080 или http://..." style="flex:1" />
+          <button id="add-proxy">Добавить</button>
+        </div>
+        <p class="muted">Формат socks5:// или http(s)://. Из ProxyMan / proxyrack / любых сервисов.</p>
+      </div>
+      <table class="data">
+        <thead><tr><th>URL</th><th>Активен</th><th>Проверка</th><th>Ошибки</th><th></th></tr></thead>
+        <tbody id="proxy-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ============ PERSONA ============ -->
+    <section id="tab-persona" class="tab-pane">
+      <h2>Персона комментатора</h2>
+      <p class="muted">Системный промпт. Описывает кто ты, тон, правила. Применяется ко всем коммам.</p>
+      <textarea id="persona-text" rows="20"></textarea>
+      <div class="row">
+        <button id="save-persona" class="btn-primary">Сохранить</button>
+        <button id="reset-persona" class="btn-ghost">Восстановить шаблон школы программирования</button>
+      </div>
+    </section>
+
+    <!-- ============ POSTS FEED ============ -->
+    <section id="tab-posts" class="tab-pane">
+      <h2>Лента постов</h2>
+      <div class="row">
+        <select id="post-filter">
+          <option value="">Все</option>
+          <option value="new">Новые</option>
+          <option value="scheduled">Запланированные</option>
+          <option value="commented">Откомментированные</option>
+          <option value="failed">Ошибки</option>
+          <option value="skipped">Пропущенные</option>
+        </select>
+        <button id="reload-posts" class="btn-ghost">Обновить</button>
+      </div>
+      <div id="feed" class="feed"></div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section id="tab-settings" class="tab-pane">
+      <h2>Поведение бота</h2>
+      <div class="card">
+        <div class="form-grid">
+          <label>Предпочитаемый провайдер</label>
+          <select id="set-provider"></select>
+
+          <label>Модель</label>
+          <input id="set-model" placeholder="llama-3.3-70b-versatile" />
+
+          <label>Ручной аппрув каждого коммента</label>
+          <input type="checkbox" id="set-manual" />
+        </div>
+        <button id="save-settings" class="btn-primary">Сохранить</button>
+      </div>
+      <div class="card">
+        <h3>.env-параметры (только чтение)</h3>
+        <p class="muted">
+          Меняй в файле <code>.env</code> и перезапускай.<br>
+          MIN_DELAY_SEC / MAX_DELAY_SEC — диапазон задержки перед коммом.<br>
+          MAX_COMMENTS_PER_HOUR — глобальный лимит.<br>
+          COMMENT_PROBABILITY — вероятность 0..1 что бот вообще ответит на пост.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
